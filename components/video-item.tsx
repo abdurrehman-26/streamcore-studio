@@ -4,6 +4,7 @@ import Image from "next/image";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { EllipsisVertical } from "lucide-react";
+import Link from "next/link";
 
 export function VideoItem({ video }: { video: Video }) {
   return (
@@ -13,7 +14,9 @@ export function VideoItem({ video }: { video: Video }) {
       </div>
       <div className="p-2 flex">
         <div className="flex flex-col h-20 flex-1">
-          <h3 className="text-lg font-semibold">{video.title}</h3>
+          <Link href={`/videos/${video.videoId}`} className="text-lg font-semibold">
+            {video.title}
+          </Link>
           <p className="text-sm text-gray-600 mt-auto">Uploaded at: {formatDate(video.createdAt)}</p>
         </div>
         <DropdownMenu>
