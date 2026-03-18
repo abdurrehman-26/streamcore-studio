@@ -9,3 +9,5 @@ export type Video = {
   thumbnailId: string;
   createdAt: string;
 };
+
+export type GetVideoResponse = Video
