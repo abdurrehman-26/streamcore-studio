@@ -10,7 +10,7 @@ export default function VideosPage() {
     queryFn: () => api.videos.getVideos(),
   })
   return (
-    <div className="ml-64 p-4">
+    <div className="p-4">
       <div className="mb-4 bg-accent p-2 rounded">
         <h1 className="text-2xl font-bold">Videos</h1>
         <p className="text-sm text-muted-foreground">

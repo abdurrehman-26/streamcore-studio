@@ -8,7 +8,9 @@ export default function AppLayout({
   return (
     <div className="min-h-svh">
       <AppSidebar />
-      {children}
+      <div className="ml-64">
+        {children}
+      </div>
     </div>
   )
 }
