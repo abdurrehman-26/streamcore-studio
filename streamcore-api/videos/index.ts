@@ -1,5 +1,5 @@
 import { API_ENDPOINT } from "@/constants/api-endpoint";
-import { GetVideoResponse, GetVideosResponse, UpdateVideoResponse } from "@/types/videos";
+import { GetVideoResponse, GetVideosResponse, UpdateVideoResponse, GenerateUploadUrlResponse } from "@/types/videos";
 import { updateVideoformSchema } from "@/zod-schemas/videos";
 import * as z from "zod";
 
@@ -34,6 +34,17 @@ export class Videos {
     });
     if (!response.ok) {
       throw new Error('Failed to update video');
+    }
+    return response.json();
+  }
+
+  async requestUploadUrl(): Promise<GenerateUploadUrlResponse> {
+    const response = await fetch(`${API_ENDPOINT}/video/generate-upload-url`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to get upload URL');
     }
     return response.json();
   }
