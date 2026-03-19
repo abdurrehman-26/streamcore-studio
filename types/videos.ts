@@ -5,7 +5,7 @@ export type Video = {
   title: string;
   description: string;
   status: string;
-  url: string;
+  manifestId: string;
   thumbnailId: string;
   createdAt: string;
 };
