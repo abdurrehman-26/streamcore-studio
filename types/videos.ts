@@ -1,5 +1,7 @@
 export type GetVideosResponse  = Video[]
 
+export type UpdateVideoResponse = Video
+
 export type Video = {
   videoId: string;
   title: string;
