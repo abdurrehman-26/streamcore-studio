@@ -7,7 +7,7 @@ import {
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { api } from "@/streamcore-api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
@@ -30,44 +30,37 @@ export default function VideoDetails({ videoId }: { videoId: string }) {
 
   const {register, handleSubmit, reset} = useForm<z.infer<typeof updateVideoformSchema>>({
     resolver: zodResolver(updateVideoformSchema),
-    defaultValues: {
-      title: query.data?.title || "Hello",
-      description: query.data?.description || "",
-    }
   })
 
   useEffect(() => {
   if (query.data) {
     reset({
-      title: query.data.title || 'This is video title',
-      description: query.data.description || 'This is video description'
+      title: query.data.title,
+      description: query.data.description
     });
   }
 }, [query.data, reset]);
 
   const [editableField, setEditableField] = useState<"title" | "description" | null>(null)
-  const [formState, setFormState] = useState({ title: "", description: "" })
-  const [isSaving, setIsSaving] = useState(false)
-
-  useEffect(() => {
-    if (query.data) {
-      setFormState({ title: query.data.title, description: query.data.description })
-    }
-  }, [query.data])
 
   const thumbnailUrl = useMemo(() => {
     if (!query.data) return ""
     return `${process.env.NEXT_PUBLIC_S3_URL}/${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}/${query.data.thumbnailId}`
   }, [query.data])
 
-  const handleUpdate = () => {
-    if (!query.data) return
-    setIsSaving(true)
-    // API endpoint for update is not available yet; keep the interaction snappy and local.
-    setTimeout(() => {
+  const updateMutation = useMutation({
+    mutationFn: (data: z.infer<typeof updateVideoformSchema>) => api.videos.updateVideo(videoId, data),
+    onSuccess: () => {
+      query.refetch()
       setEditableField(null)
-      setIsSaving(false)
-    }, 500)
+    },
+    onError: () => {
+      //TODO Handle error (e.g., show a notification)
+    },
+  })
+
+  const handleUpdate = (data: z.infer<typeof updateVideoformSchema>) => {
+    updateMutation.mutate(data)
   }
 
   const renderLeftPanel = () => {
@@ -105,57 +98,52 @@ export default function VideoDetails({ videoId }: { videoId: string }) {
         </div>
 
         <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Video</p>
-              <h1 className="text-2xl font-semibold leading-tight">Details</h1>
+          <div>
+            <h1 className="text-2xl font-semibold leading-tight">Video Details</h1>
+          </div>
+
+          <form className="space-y-4" onSubmit={handleSubmit(handleUpdate)}>
+            <Field>
+              <FieldLabel className="cursor-pointer" onClick={() => setEditableField("title")}>Title</FieldLabel>
+              <FieldContent className="gap-2">
+                <Input
+                  readOnly={isTitleLocked}
+                  onClick={() => setEditableField("title")}
+                  {...register("title")}
+                  className={cn(
+                    "text-lg font-semibold", 
+                    isTitleLocked && "cursor-pointer border-dashed bg-muted/40"
+                  )}
+                />
+                <FieldDescription>Click to edit the title</FieldDescription>
+              </FieldContent>
+            </Field>
+
+            <Field>
+              <FieldLabel className="cursor-pointer" onClick={() => setEditableField("description")}>Description</FieldLabel>
+              <FieldContent className="gap-2">
+                <textarea
+                  readOnly={isDescriptionLocked}
+                  onClick={() => setEditableField("description")}
+                  {...register("description")}
+                  className={cn(
+                    "min-h-28 w-full rounded-lg border bg-transparent p-3 text-sm leading-relaxed outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40",
+                    isDescriptionLocked && "cursor-pointer border-dashed bg-muted/40"
+                  )}
+                />
+                <FieldDescription>Tap to make quick edits</FieldDescription>
+              </FieldContent>
+            </Field>
+
+            <div className="flex items-center justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setEditableField(null)} disabled={updateMutation.isPending}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updateMutation.isPending} size="sm">
+                {updateMutation.isPending ? "Saving..." : "Update details"}
+              </Button>
             </div>
-            <Button size="sm" variant="outline" onClick={() => query.refetch()} disabled={query.isFetching}>
-              Refresh
-            </Button>
-          </div>
-
-          <Field>
-            <FieldLabel className="cursor-pointer" onClick={() => setEditableField("title")}>Title</FieldLabel>
-            <FieldContent className="gap-2">
-              <Input
-                readOnly={isTitleLocked}
-                onClick={() => setEditableField("title")}
-                {...register("title")}
-                className={cn(
-                  "text-lg font-semibold", 
-                  isTitleLocked && "cursor-pointer border-dashed bg-muted/40"
-                )}
-              />
-              <FieldDescription>Click to edit the title</FieldDescription>
-            </FieldContent>
-          </Field>
-
-          <Field>
-            <FieldLabel className="cursor-pointer" onClick={() => setEditableField("description")}>Description</FieldLabel>
-            <FieldContent className="gap-2">
-              <textarea
-                value={formState.description}
-                readOnly={isDescriptionLocked}
-                onClick={() => setEditableField("description")}
-                onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
-                className={cn(
-                  "min-h-28 w-full rounded-lg border bg-transparent p-3 text-sm leading-relaxed outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40",
-                  isDescriptionLocked && "cursor-pointer border-dashed bg-muted/40"
-                )}
-              />
-              <FieldDescription>Tap to make quick edits</FieldDescription>
-            </FieldContent>
-          </Field>
-
-          <div className="flex items-center justify-end gap-2">
-            <Button variant="ghost" size="sm" onClick={() => setEditableField(null)} disabled={isSaving}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdate} disabled={isSaving}>
-              {isSaving ? "Saving..." : "Update details"}
-            </Button>
-          </div>
+          </form>
         </div>
       </div>
     )
@@ -188,7 +176,7 @@ export default function VideoDetails({ videoId }: { videoId: string }) {
         </div>
 
         <div className="space-y-3 text-sm">
-          <MetaRow label="Video ID" value={`#${query.data.videoId}`} />
+          <MetaRow label="Video ID" value={`${query.data.videoId}`} />
           <MetaRow label="Uploaded" value={formatDate(query.data.createdAt)} />
           <MetaRow label="Source" value={`${process.env.NEXT_PUBLIC_S3_URL}/${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}/${query.data.manifestId}`} isLink />
           <MetaRow label="Thumbnail" value={thumbnailUrl} isLink />
