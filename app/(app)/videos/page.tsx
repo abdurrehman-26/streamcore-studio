@@ -1,11 +1,10 @@
 "use client"
 import { useState, type ChangeEvent } from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/streamcore-api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { VideoItem } from "@/components/video-item"
 import { Button } from "@/components/ui/button"
-import { API_ENDPOINT } from "@/constants/api-endpoint"
 import {
   Dialog,
   DialogContent,
@@ -14,55 +13,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { useVideoUpload } from "@/hooks/useVideoUpload"
 
 export default function VideosPage() {
   const queryClient = useQueryClient()
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const { upload, progress, isUploading, error, resetProgress } = useVideoUpload()
+  const [inputKey, setInputKey] = useState(0)
 
   const query = useQuery({
     queryKey: ['videos'],
     queryFn: () => api.videos.getVideos(),
   })
-  // This implementation of upload is just for demonstration purposes and is not working. we will implement it in the next steps.
-  const uploadMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const presignResponse = await fetch(`${API_ENDPOINT}/video/upload-url`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ fileName: file.name, fileType: file.type }),
-      })
-
-      if (!presignResponse.ok) {
-        throw new Error('Failed to get upload URL')
-      }
-
-      const { uploadUrl } = await presignResponse.json() as { uploadUrl: string }
-
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type || 'application/octet-stream' },
-        body: file,
-      })
-
-      if (!uploadResponse.ok) {
-        throw new Error('Upload failed')
-      }
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['videos'] })
-      setIsUploadOpen(false)
-      setSelectedFile(null)
-    },
-  })
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-    setSelectedFile(file)
-    uploadMutation.mutate(file)
-    event.target.value = ''
+    upload(file, {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: ["videos"] })
+        setIsUploadOpen(false)
+        setInputKey(k => k + 1)
+        resetProgress()
+      },
+    })
   }
 
   return (
@@ -88,12 +64,13 @@ export default function VideosPage() {
             </DialogHeader>
 
             <label className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/40 bg-muted/40 text-center transition hover:border-muted-foreground/70">
-              <input
+              <Input
+                key={inputKey}
                 type="file"
                 accept="video/*"
                 className="hidden"
                 onChange={handleFileSelect}
-                disabled={uploadMutation.isPending}
+                disabled={isUploading}
               />
               <span className="text-sm font-medium">
                 Click to select a video file
@@ -108,12 +85,12 @@ export default function VideosPage() {
                 Selected: <span className="font-medium">{selectedFile.name}</span>
               </p>
             )}
-            {uploadMutation.isPending && (
-              <p className="text-sm text-muted-foreground">Uploading...</p>
+            {isUploading && (
+              <p className="text-sm text-muted-foreground">Uploading {progress}%</p>
             )}
-            {uploadMutation.isError && (
+            {error && (
               <p className="text-sm text-destructive">
-                {(uploadMutation.error as Error).message}
+                {(error as Error).message}
               </p>
             )}
 
@@ -121,11 +98,11 @@ export default function VideosPage() {
               <Button
                 variant="ghost"
                 onClick={() => {
-                  if (uploadMutation.isPending) return
+                  if (isUploading) return
                   setSelectedFile(null)
                   setIsUploadOpen(false)
                 }}
-                disabled={uploadMutation.isPending}
+                disabled={isUploading}
               >
                 Cancel
               </Button>
