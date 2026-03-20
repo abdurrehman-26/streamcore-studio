@@ -48,4 +48,32 @@ export class Videos {
     }
     return response.json();
   }
+
+  async uploadVideo(
+    url: string,
+    file: File,
+    onProgress: (percent: number) => void
+  ): Promise<true> {
+    return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+
+    xhr.open("PUT", url)
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100)
+        onProgress(percent)
+      }
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve(true)
+      else reject(new Error("Upload failed"))
+    }
+
+    xhr.onerror = () => reject(new Error("Network error during upload"))
+
+    xhr.send(file)
+  })
+}
 }
