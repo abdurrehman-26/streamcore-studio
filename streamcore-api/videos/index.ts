@@ -38,7 +38,7 @@ export class Videos {
     return response.json();
   }
 
-  async requestUploadUrl(): Promise<GenerateUploadUrlResponse> {
+  async generateUploadUrl(): Promise<GenerateUploadUrlResponse> {
     const response = await fetch(`${API_ENDPOINT}/video/generate-upload-url`, {
       method: 'POST',
       credentials: 'include',
