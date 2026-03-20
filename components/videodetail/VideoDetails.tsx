@@ -91,7 +91,6 @@ export default function VideoDetails({ videoId }: { videoId: string }) {
           <MediaPlayer title={query.data.title} src={`${process.env.NEXT_PUBLIC_S3_URL}/${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}/${query.data.manifestId}`} poster={thumbnailUrl} className="aspect-video">
             <MediaProvider />
             <DefaultVideoLayout
-              thumbnails="https://files.vidstack.io/sprite-fight/thumbnails.vtt"
               icons={defaultLayoutIcons}
             />
           </MediaPlayer>
