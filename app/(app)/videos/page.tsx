@@ -20,6 +20,7 @@ export default function VideosPage() {
   const queryClient = useQueryClient()
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  // TODO: we can get rid of this local state and directly use the upload progress from the store in the VideoItem component
   const { upload, progress, isUploading, error, resetProgress } = useVideoUpload()
   const [inputKey, setInputKey] = useState(0)
 
