@@ -1,34 +1,29 @@
 import { useUploadStore } from "@/store/store"
 import { api } from "@/streamcore-api"
-import { useMutation } from "@tanstack/react-query"
-import { useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export function useVideoUpload() {
-  const [progress, setProgress] = useState(0)
-  const { setProgress: setUploadProgress } = useUploadStore()
+  const queryClient = useQueryClient()
+  const { setUpload, updateProgress, markSuccess } = useUploadStore()
 
   const mutation = useMutation({
     mutationFn: async (file: File) => {
-      setProgress(0)
-
-      // Step 1: get presigned URL from your backend
+      // Step 1: presigned URL
       const { url, videoId } = await api.videos.generateUploadUrl()
 
-      setUploadProgress(videoId, 0)
+      // Initialize store entry
+      setUpload(videoId, { file, progress: 0, status: "uploading" })
 
-      // Step 2: upload raw binary with progress
-      await api.videos.uploadVideo(url, file, percent => {
-        setProgress(percent)
-        setUploadProgress(videoId, percent)
+      // Step 2: upload with progress callback
+      await api.videos.uploadVideo(url, file, (percent) => {
+        updateProgress(videoId, percent)
       })
+
+      // Step 3: mark success
+      markSuccess(videoId)
+      await queryClient.invalidateQueries({ queryKey: ["videos"] })
     },
   })
 
-  return {
-    upload: mutation.mutate,
-    isUploading: mutation.isPending,
-    error: mutation.error,
-    progress,
-    resetProgress: () => setProgress(0),
-  }
+  return { upload: mutation.mutate }
 }
