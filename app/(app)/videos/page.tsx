@@ -19,9 +19,7 @@ import { useVideoUpload } from "@/hooks/useVideoUpload"
 export default function VideosPage() {
   const queryClient = useQueryClient()
   const [isUploadOpen, setIsUploadOpen] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  // TODO: we can get rid of this local state and directly use the upload progress from the store in the VideoItem component
-  const { upload, progress, isUploading, error, resetProgress } = useVideoUpload()
+  const { upload } = useVideoUpload()
   const [inputKey, setInputKey] = useState(0)
 
   const query = useQuery({
@@ -32,92 +30,76 @@ export default function VideosPage() {
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
+
+    setIsUploadOpen(false)
+    setInputKey(k => k + 1)
+
     upload(file, {
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: ["videos"] })
-        setIsUploadOpen(false)
-        setInputKey(k => k + 1)
-        resetProgress()
       },
     })
   }
 
   return (
-    <div className="p-4">
-      <div className="mb-4 bg-accent p-3 rounded flex items-center justify-between">
+    <div className="p-6">
+      {/* Header */}
+      <div className="mb-6 p-4 bg-accent rounded-lg border flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Videos</h1>
+          <h1 className="text-2xl font-semibold">Videos</h1>
           <p className="text-sm text-muted-foreground">
-            Manage your videos here. You can view, edit, or delete your videos.
+            Manage your videos. Upload, preview, or delete anytime.
           </p>
         </div>
+
         <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
           <DialogTrigger asChild>
-            <Button>Upload Video</Button>
+            <Button className="px-5">Upload Video</Button>
           </DialogTrigger>
 
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Upload video</DialogTitle>
+              <DialogTitle className="text-xl">Upload a Video</DialogTitle>
               <DialogDescription>
-                Choose a file to upload. We&apos;ll request a secure upload URL and start the transfer.
+                Select a video file to upload. We’ll handle everything securely.
               </DialogDescription>
             </DialogHeader>
 
-            <label className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/40 bg-muted/40 text-center transition hover:border-muted-foreground/70">
+            {/* Upload Zone */}
+            <label className="flex flex-col items-center justify-center h-36 cursor-pointer border-2 border-dashed border-muted-foreground/40 bg-muted/40 rounded-lg transition hover:border-muted-foreground px-4 mt-2">
               <Input
                 key={inputKey}
                 type="file"
                 accept="video/*"
                 className="hidden"
                 onChange={handleFileSelect}
-                disabled={isUploading}
               />
-              <span className="text-sm font-medium">
-                Click to select a video file
-              </span>
-              <span className="mt-1 text-xs text-muted-foreground">
-                MP4, MOV, MKV and more are supported.
+
+              <span className="text-sm font-medium">Click to choose a video</span>
+              <span className="text-xs text-muted-foreground mt-1">
+                MP4, MOV, MKV supported
               </span>
             </label>
 
-            {selectedFile && (
-              <p className="text-sm text-foreground">
-                Selected: <span className="font-medium">{selectedFile.name}</span>
-              </p>
-            )}
-            {isUploading && (
-              <p className="text-sm text-muted-foreground">Uploading {progress}%</p>
-            )}
-            {error && (
-              <p className="text-sm text-destructive">
-                {(error as Error).message}
-              </p>
-            )}
-
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  if (isUploading) return
-                  setSelectedFile(null)
-                  setIsUploadOpen(false)
-                }}
-                disabled={isUploading}
-              >
-                Cancel
-              </Button>
-            </div>
           </DialogContent>
         </Dialog>
       </div>
 
+      {/* Loading Skeleton */}
       {query.isLoading && (
-        Array.from({ length: 5 }).map((_, index) => (
-          <Skeleton key={index} className="h-65 w-60 mb-2" />
-        ))
+        <div className="grid grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-56 w-full rounded-lg" />
+          ))}
+        </div>
       )}
-      {query.isError && <p>Error occurred while fetching videos.</p>}
+
+      {/* Error */}
+      {query.isError && (
+        <div className="text-red-500 text-sm">Error loading videos.</div>
+      )}
+
+      {/* Videos */}
       {query.data && (
         <ul className="grid grid-cols-4 gap-4">
           {query.data.map((video) => (
