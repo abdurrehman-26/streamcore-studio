@@ -32,8 +32,7 @@ export function LoginForm({
     onSuccess: (response) => {
       console.log('Login successful', response)
       queryClient.setQueryData(['auth', 'access_token'], response.access_token)
-      document.cookie = `access_token=${response.access_token}; path=/; max-age=3600; samesite=strict`
-      router.push('/profile')
+      router.push('/videos')
     },
     onError: (error) => {
       console.error('Login failed', error)

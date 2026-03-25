@@ -5,7 +5,7 @@ import * as z from "zod";
 
 export class Videos {
   async getVideos(): Promise<GetVideosResponse> {
-    const response = await fetch(`${API_ENDPOINT}/video/all`, {
+    const response = await fetch(`${API_ENDPOINT}/videos/all`, {
       credentials: 'include',
     });
     if (!response.ok) {
@@ -14,7 +14,7 @@ export class Videos {
     return response.json();
   }
   async getVideo(videoId: string): Promise<GetVideoResponse> {
-    const response = await fetch(`${API_ENDPOINT}/video/${videoId}`, {
+    const response = await fetch(`${API_ENDPOINT}/videos/${videoId}`, {
       credentials: 'include',
     });
     if (!response.ok) {
@@ -24,7 +24,7 @@ export class Videos {
   }
 
   async updateVideo(videoId: string, data: z.infer<typeof updateVideoformSchema>): Promise<UpdateVideoResponse> {
-    const response = await fetch(`${API_ENDPOINT}/video/${videoId}`, {
+    const response = await fetch(`${API_ENDPOINT}/videos/${videoId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ export class Videos {
   }
 
   async generateUploadUrl(): Promise<GenerateUploadUrlResponse> {
-    const response = await fetch(`${API_ENDPOINT}/video/generate-upload-url`, {
+    const response = await fetch(`${API_ENDPOINT}/videos/generate-upload-url`, {
       method: 'POST',
       credentials: 'include',
     });
