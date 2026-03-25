@@ -1,5 +1,5 @@
 import { API_ENDPOINT } from "@/constants/api-endpoint";
-import { GetVideoResponse, GetVideosResponse, UpdateVideoResponse, GenerateUploadUrlResponse } from "@/types/videos";
+import { GetVideoResponse, GetVideosResponse, UpdateVideoResponse, CreatePutUploadResponse } from "@/types/videos";
 import { updateVideoformSchema } from "@/zod-schemas/videos";
 import * as z from "zod";
 
@@ -38,8 +38,8 @@ export class Videos {
     return response.json();
   }
 
-  async generateUploadUrl(): Promise<GenerateUploadUrlResponse> {
-    const response = await fetch(`${API_ENDPOINT}/videos/generate-upload-url`, {
+  async createPutUpload(): Promise<CreatePutUploadResponse> {
+    const response = await fetch(`${API_ENDPOINT}/videos/create-put-upload`, {
       method: 'POST',
       credentials: 'include',
     });

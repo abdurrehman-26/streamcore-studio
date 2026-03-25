@@ -9,7 +9,7 @@ export function useVideoUpload() {
   const mutation = useMutation({
     mutationFn: async (file: File) => {
       // Step 1: presigned URL
-      const { url, videoId } = await api.videos.generateUploadUrl()
+      const { url, videoId } = await api.videos.createPutUpload()
 
       // Initialize store entry
       setUpload(videoId, { file, progress: 0, status: "uploading" })

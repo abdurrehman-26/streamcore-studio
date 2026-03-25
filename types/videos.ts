@@ -14,7 +14,7 @@ export type Video = {
 
 export type GetVideoResponse = Video
 
-export type GenerateUploadUrlResponse = {
+export type CreatePutUploadResponse = {
   url: string;
   videoId: string;
 }
