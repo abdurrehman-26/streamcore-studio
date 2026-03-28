@@ -54,26 +54,104 @@ export class Videos {
     file: File,
     onProgress: (percent: number) => void
   ): Promise<true> {
-    return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
+      return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
 
-    xhr.open("PUT", url)
+      xhr.open("PUT", url)
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percent = Math.round((event.loaded / event.total) * 100)
-        onProgress(percent)
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100)
+          onProgress(percent)
+        }
       }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve(true)
+        else reject(new Error("Upload failed"))
+      }
+
+      xhr.onerror = () => reject(new Error("Network error during upload"))
+
+      xhr.send(file)
+    })
+  }
+
+  async createMultipartUpload(): Promise<{uploadId: string; key: string, videoId: string}> {
+    const response = await fetch(`${API_ENDPOINT}/videos/create-multipart-upload`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create multipart upload');
     }
+    return response.json();
+  }
 
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve(true)
-      else reject(new Error("Upload failed"))
+  async getMultipartUploadUrls(uploadId: string, key: string, partNumbers: number[]): Promise<{ partNumber: number; url: string; }[]> {
+    const response = await fetch(`${API_ENDPOINT}/videos/multipart-upload-urls`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        uploadId,
+        key,
+        partNumbers,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Failed to get multipart upload URLs');
     }
+    return response.json();
+  }
 
-    xhr.onerror = () => reject(new Error("Network error during upload"))
+  async uploadPart(
+  url: string,
+  blob: Blob,
+  onProgress?: (percent: number) => void
+  ): Promise<{ ETag: string }> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open("PUT", url)
 
-    xhr.send(file)
-  })
-}
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable && onProgress) {
+          const percent = Math.round((event.loaded / event.total) * 100)
+          onProgress(percent)
+        }
+      }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const eTag = xhr.getResponseHeader("ETag")
+          resolve({ ETag: eTag || "" })
+        } else reject(new Error("Upload failed"))
+      }
+
+      xhr.onerror = () => reject(new Error("Network error"))
+
+      xhr.send(blob)
+    })
+  }
+
+  async completeMultipartUpload(uploadId: string, key: string, parts: {ETag: string, PartNumber: number}[]) {
+    const response = await fetch(`${API_ENDPOINT}/videos/complete-multipart-upload`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        uploadId,
+        key,
+        parts
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Failed to complete Multipart upload');
+    }
+    return response.json();
+  }
 }
