@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, Eye, Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import { useUploadStore } from "@/store/store";
 
@@ -22,6 +22,12 @@ export function VideoItem({ video }: { video: Video }) {
   const isUploading = video.status === "uploading";
   const isProcessing = video.status === "processing";
   const isReady = video.status === "ready";
+
+  const videoOptions = [
+    { label: "View", icon: <Eye className="size-4 mr-2" /> },
+    { label: "Edit", icon: <Pencil className="size-4 mr-2" /> },
+    { label: "Delete", icon: <Trash className="size-4 mr-2" />, variant: "destructive" },
+  ];
 
   return (
     <div className="w-58 rounded-xl border shadow-sm hover:shadow-md transition-shadow duration-200 bg-card">
@@ -61,7 +67,7 @@ export function VideoItem({ video }: { video: Video }) {
         <div className="flex flex-col flex-1 min-w-0">
           <Link
             href={`/videos/${video.videoId}`}
-            className="font-semibold text-sm line-clamp-2 hover:text-blue-600 transition-colors"
+            className="font-semibold text-sm line-clamp-2 hover:text-gray-600 transition-colors"
           >
             {video.title}
           </Link>
@@ -82,21 +88,28 @@ export function VideoItem({ video }: { video: Video }) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="rounded-full size-8 ml-1 hover:bg-blue-50 text-muted-foreground"
+              className="rounded-full size-8 ml-1 hover:bg-blue-50 text-muted-foreground cursor-pointer"
             >
               <EllipsisVertical className="size-5" />
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuContent align="end" className="w-50">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel className="select-none">Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>View</DropdownMenuItem>
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600 focus:text-red-600">
-                Delete
-              </DropdownMenuItem>
+              {videoOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.label}
+                  className="cursor-pointer"
+                  {...(option.variant === "destructive" && {
+                    variant: option.variant,
+                  })}
+                >
+                  {option.icon}
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
