@@ -45,7 +45,7 @@ export default function VideosPage() {
     <div className="p-6">
       {/* Header */}
       <div className="mb-6 p-4 bg-accent rounded-lg border flex items-center justify-between">
-        <div>
+        <div className="select-none">
           <h1 className="text-2xl font-semibold">Videos</h1>
           <p className="text-sm text-muted-foreground">
             Manage your videos. Upload, preview, or delete anytime.
@@ -54,7 +54,7 @@ export default function VideosPage() {
 
         <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
           <DialogTrigger asChild>
-            <Button className="px-5">Upload Video</Button>
+            <Button className="px-5 cursor-pointer" size="lg">Upload Video</Button>
           </DialogTrigger>
 
           <DialogContent className="sm:max-w-md">
