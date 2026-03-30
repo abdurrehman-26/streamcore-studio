@@ -5,9 +5,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '9000',
+        protocol: 'https',
+        hostname: process.env.NEXT_PUBLIC_S3_URL?.replace(/^https?:\/\//, '') || 's3.aws.com',
       },
     ],
     dangerouslyAllowLocalIP: true,
