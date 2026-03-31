@@ -18,8 +18,9 @@ import { useUploadStore } from "@/store/store";
 export function VideoItem({ video }: { video: Video }) {
   const { uploads } = useUploadStore();
   const progress = uploads[video.videoId]?.progress;
+  const isFailed = uploads[video.videoId]?.status === "error";
+  const isUploading = uploads[video.videoId]?.status === "uploading";
 
-  const isUploading = video.status === "uploading";
   const isProcessing = video.status === "processing";
   const isReady = video.status === "ready";
 
@@ -45,9 +46,11 @@ export function VideoItem({ video }: { video: Video }) {
           <div className="w-full h-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
             {isUploading
               ? `Uploading... ${progress ?? 0}%`
+              : isFailed
+              ? "Upload Failed"
               : isProcessing
               ? "Processing..."
-              : "Pending..."}
+              : "Processing will start shortly..."}
           </div>
         )}
 
@@ -75,6 +78,12 @@ export function VideoItem({ video }: { video: Video }) {
           {isUploading && (
             <span className="text-xs text-blue-600 mt-1">
               Uploading… {progress ?? 0}%
+            </span>
+          )}
+
+          {isFailed && (
+            <span className="text-xs text-red-600 mt-1">
+              Upload failed. Please try again.
             </span>
           )}
 
