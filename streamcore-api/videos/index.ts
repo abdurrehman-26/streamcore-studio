@@ -5,7 +5,7 @@ import * as z from "zod";
 
 export class Videos {
   async getVideos(): Promise<GetVideosResponse> {
-    const response = await fetch(`${API_ENDPOINT}/videos/all`, {
+    const response = await fetch(`${API_ENDPOINT}/videos`, {
       credentials: 'include',
     });
     if (!response.ok) {
