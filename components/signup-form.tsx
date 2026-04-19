@@ -1,3 +1,4 @@
+"use client"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,12 +39,12 @@ export function SignupForm({
     signupMutation.mutate(data)
   }
   return (
-    <form onSubmit={handleSubmit(handleSignup)} className={cn("flex flex-col gap-6", className)} {...props}>
+    <form onSubmit={handleSubmit(handleSignup)} className={cn("flex flex-col gap-6 container max-w-3xl", className)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Create your account</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            Fill in the form below to create your account
+            Join StreamCore Studio and start streaming your content to the world
           </p>
         </div>
         <Field>
@@ -94,7 +95,7 @@ export function SignupForm({
         </Field>
         <Field>
           <FieldDescription className="px-6 text-center">
-            Already have an account? <Link href="/login">Sign in</Link>
+            Already have an account? <Link className="text-primary" href="/login">Sign in</Link>
           </FieldDescription>
         </Field>
       </FieldGroup>

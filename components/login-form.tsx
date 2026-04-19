@@ -42,9 +42,9 @@ export function LoginForm({
     loginMutation.mutate(data)
   };
   return (
-    <form onSubmit={handleSubmit(handleLogin)} className={cn("flex flex-col gap-6", className)} {...props}>
+    <form onSubmit={handleSubmit(handleLogin)} className={cn("flex flex-col gap-6 container max-w-3xl", className)} {...props}>
       <FieldGroup>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Welcome back</h1>
           <p className="text-sm text-balance text-muted-foreground">
             Sign in to continue to your account
@@ -85,7 +85,7 @@ export function LoginForm({
         <Field>
           <FieldDescription className="text-center">
             Don&apos;t have an account?{" "}
-            <Link href='/signup' className="underline underline-offset-4 text-green-600">
+            <Link href='/signup' className="underline underline-offset-4 text-primary">
               Sign up
             </Link>
           </FieldDescription>
