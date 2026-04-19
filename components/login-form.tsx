@@ -44,10 +44,10 @@ export function LoginForm({
   return (
     <form onSubmit={handleSubmit(handleLogin)} className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold">Welcome back</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            Enter your email below to login to your account
+            Sign in to continue to your account
           </p>
         </div>
         <Field>
@@ -80,12 +80,12 @@ export function LoginForm({
           {formState.errors.password && <FieldError errors={[formState.errors.password]} />}
         </Field>
         <Field>
-          <Button type="submit">Login</Button>
+          <Button size="lg" type="submit">Login</Button>
         </Field>
         <Field>
           <FieldDescription className="text-center">
             Don&apos;t have an account?{" "}
-            <Link href='/signup' className="underline underline-offset-4">
+            <Link href='/signup' className="underline underline-offset-4 text-green-600">
               Sign up
             </Link>
           </FieldDescription>
