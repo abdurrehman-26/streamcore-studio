@@ -1,128 +1,119 @@
+import Image from "next/image";
+import Link from "next/link";
+import { EllipsisVertical, Eye, Pencil, Trash } from "lucide-react";
+
 import { formatDate } from "@/lib/format-date";
 import { Video } from "@/types/videos";
-import Image from "next/image";
+import { useUploadStore } from "@/store/store";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
-import { EllipsisVertical, Eye, Pencil, Trash } from "lucide-react";
-import Link from "next/link";
-import { useUploadStore } from "@/store/store";
 
 export function VideoItem({ video }: { video: Video }) {
   const { uploads } = useUploadStore();
-  const progress = uploads[video.videoId]?.progress;
-  const isFailed = uploads[video.videoId]?.status === "error";
-  const isUploading = uploads[video.videoId]?.status === "uploading";
-
-  const isProcessing = video.status === "processing";
+  
+  const uploadState = uploads[video.videoId];
+  const progress = uploadState?.progress ?? 0;
+  const isUploading = uploadState?.status === "uploading";
+  const isFailed = uploadState?.status === "error";
+  
   const isReady = video.status === "ready";
-
-  const videoOptions = [
-    { label: "View", icon: <Eye className="size-4 mr-2" /> },
-    { label: "Edit", icon: <Pencil className="size-4 mr-2" /> },
-    { label: "Delete", icon: <Trash className="size-4 mr-2" />, variant: "destructive" },
-  ];
+  const isProcessing = video.status === "processing";
 
   return (
-    <div className="w-58 rounded-xl border shadow-sm hover:shadow-md transition-shadow duration-200 bg-card">
-      {/* Thumbnail */}
-      <div className="relative w-full h-40 overflow-hidden rounded-t-xl">
+    <div className="w-full max-w-70 rounded-xl border bg-card shadow-sm transition-all hover:shadow-md">
+      {/* Thumbnail Container: Forced 16:9 Aspect Ratio */}
+      <div className="relative aspect-video w-full overflow-hidden rounded-t-xl bg-muted cursor-default">
         {isReady ? (
           <Image
-            width={1920}
-            height={1080}
+            fill
             src={`${process.env.NEXT_PUBLIC_S3_URL}/${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}/${video.thumbnailId}`}
-            alt="Video Thumbnail"
-            className="object-cover w-full h-full"
+            alt={video.title}
+            className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
-            {isUploading
-              ? `Uploading... ${progress ?? 0}%`
-              : isFailed
-              ? "Upload Failed"
-              : isProcessing
-              ? "Processing..."
-              : "Processing will start shortly..."}
+          <div className="flex h-full flex-col items-center justify-center p-4 text-center text-xs text-muted-foreground">
+            {isUploading ? `Uploading ${progress}%` : 
+             isFailed ? "Upload Failed" : 
+             isProcessing ? "Processing..." : "Queued..."}
           </div>
         )}
 
-        {/* Upload progress bar */}
+        {/* Timestamp Overlay */}
+        {isReady && (
+          <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+            9:15
+          </span>
+        )}
+
+        {/* Minimalist Progress Bar */}
         {isUploading && (
-          <div className="absolute bottom-0 left-0 w-full bg-blue-100 h-1">
-            <div
-              className="h-full bg-blue-500 transition-all duration-200"
-              style={{ width: `${progress ?? 0}%` }}
-            ></div>
+          <div className="absolute bottom-0 left-0 h-1 w-full bg-secondary">
+            <div 
+              className="h-full bg-primary transition-all duration-300" 
+              style={{ width: `${progress}%` }} 
+            />
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-3 flex">
-        <div className="flex flex-col flex-1 min-w-0">
+      {/* Content Area */}
+      <div className="flex p-3 gap-2">
+        <div className="flex flex-1 flex-col min-w-0">
           <Link
             href={`/videos/${video.videoId}`}
-            className="font-semibold text-sm line-clamp-2 hover:text-gray-600 transition-colors"
+            className="truncate text-sm font-semibold leading-none hover:text-primary transition-colors"
           >
             {video.title}
           </Link>
 
-          {isUploading && (
-            <span className="text-xs text-blue-600 mt-1">
-              Uploading… {progress ?? 0}%
+          <div className="mt-1.5 flex flex-col gap-0.5">
+            {isUploading && (
+              <span className="text-[11px] font-medium text-blue-600">Uploading...</span>
+            )}
+            {isFailed && (
+              <span className="text-[11px] font-medium text-destructive">Upload failed</span>
+            )}
+            <span className="text-[10px] text-muted-foreground">
+              {formatDate(video.createdAt)}
             </span>
-          )}
-
-          {isFailed && (
-            <span className="text-xs text-red-600 mt-1">
-              Upload failed. Please try again.
-            </span>
-          )}
-
-          <p className="text-xs text-muted-foreground mt-auto pt-1">
-            Uploaded at {formatDate(video.createdAt)}
-          </p>
+          </div>
         </div>
 
-        {/* Menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="rounded-full size-8 ml-1 hover:bg-blue-50 text-muted-foreground cursor-pointer"
-            >
-              <EllipsisVertical className="size-5" />
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end" className="w-50">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="select-none">Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {videoOptions.map((option) => (
-                <DropdownMenuItem
-                  key={option.label}
-                  className="cursor-pointer"
-                  {...(option.variant === "destructive" && {
-                    variant: option.variant,
-                  })}
-                >
-                  {option.icon}
-                  {option.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <VideoActionsMenu />
       </div>
     </div>
+  );
+}
+
+function VideoActionsMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shrink-0">
+          <EllipsisVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="cursor-pointer">
+          <Eye className="mr-2 h-4 w-4" /> View
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer">
+          <Pencil className="mr-2 h-4 w-4" /> Edit
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive">
+          <Trash className="mr-2 h-4 w-4" /> Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
