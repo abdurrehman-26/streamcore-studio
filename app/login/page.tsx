@@ -1,5 +1,5 @@
 import { LoginForm } from "@/components/login-form"
-import { Play } from "lucide-react"
+import Logo from "@/components/Logo"
 import Image from "next/image"
 
 export default function LoginPage() {
@@ -10,13 +10,7 @@ export default function LoginPage() {
       <div className="flex flex-col p-6 md:p-10 bg-white items-center">
         
         {/* Logo */}
-        <div className="flex items-center gap-2 font-medium mb-10">
-          <div className="flex size-8 items-center justify-center rounded-md bg-green-600 text-white">
-            <Play className="size-4" />
-          </div>
-          <span className="text-lg">
-            <span className="text-primary font-bold">StreamCore</span> Studio</span>
-        </div>
+        <Logo />
 
         {/* Form */}
         <LoginForm />
