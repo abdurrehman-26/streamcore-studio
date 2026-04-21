@@ -10,13 +10,13 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/streamcore-api";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { updateVideoformSchema } from "@/zod-schemas/videos";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "../ui/card";
+import VideoData from "../video-data";
 
 export default function VideoDetails({ videoId }: { videoId: string }) {
   const query = useQuery({
@@ -42,8 +42,8 @@ export default function VideoDetails({ videoId }: { videoId: string }) {
   return (
     <div className="px-6 py-6">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="overflow-hidden rounded-xl border bg-black shadow-sm max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="overflow-hidden rounded-xl border bg-black shadow-sm max-w-4xl">
             <MediaPlayer
               title={query.data?.title}
               src={`${process.env.NEXT_PUBLIC_S3_URL}/${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}/${query.data?.manifestId}`}
@@ -53,50 +53,7 @@ export default function VideoDetails({ videoId }: { videoId: string }) {
               <DefaultVideoLayout icons={defaultLayoutIcons} />
             </MediaPlayer>
           </div>
-          <div>
-            <table className="w-full text-sm border-collapse">
-              <tbody className="[&_tr]:h-10">
-                <tr>
-                  <td className="w-40 font-semibold text-slate-600">
-                    Video ID
-                  </td>
-                  <td className="text-slate-800">{query.data.videoId}</td>
-                </tr>
-
-                <tr>
-                  <td className="font-semibold text-slate-600">Title</td>
-                  <td className="text-slate-800">
-                    {query.data?.title || "Video Title"}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td className="font-semibold text-slate-600">Uploaded On</td>
-                  <td className="text-slate-800">
-                    {formatDate(query.data?.createdAt)}
-                  </td>
-                </tr>
-
-                <tr>
-                  <td className="font-semibold text-slate-600">Status</td>
-                  <td>
-                    <span className="text-primary">
-                      {query.data.status.replace(/^./g, (char) => char.toUpperCase())}
-                    </span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td className="font-semibold text-slate-600">Description</td>
-                  <td className="text-slate-800">
-                    <p className="line-clamp-1 text-slate-700">
-                      {query.data?.description}
-                    </p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <VideoData video={query.data} />
         </div>
 
         <div className="flex items-center gap-8 border-b border-slate-200 px-2">
