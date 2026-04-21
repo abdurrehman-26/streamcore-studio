@@ -45,8 +45,6 @@ export default function VideosPage() {
 
   return (
     <div className="min-h-screen bg-background max-w-7xl mx-auto">
-      {/* 1. Global Top Navigation (Mockup Style) */}
-      <AppHeader />
 
       <div className="px-3 py-6">
         {/* 2. Page Title and Upload Section */}
