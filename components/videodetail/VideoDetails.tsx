@@ -40,18 +40,20 @@ export default function VideoDetails({ videoId }: { videoId: string }) {
   if (query.isLoading || !query.data) return <LoadingSkeleton />;
 
   return (
-    <div className="px-6 py-6">
+    <div className="px-6 py-6 container mx-auto">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="overflow-hidden rounded-xl border bg-black shadow-sm max-w-4xl">
-            <MediaPlayer
-              title={query.data?.title}
-              src={`${process.env.NEXT_PUBLIC_S3_URL}/${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}/${query.data?.manifestId}`}
-              className="aspect-video"
-            >
-              <MediaProvider />
-              <DefaultVideoLayout icons={defaultLayoutIcons} />
-            </MediaPlayer>
+        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 justify-center">
+          <div>
+            <div className="overflow-hidden rounded-xl border bg-black shadow-sm w-sm max-w-4xl shrink-0 mx-auto">
+              <MediaPlayer
+                title={query.data?.title}
+                src={`${process.env.NEXT_PUBLIC_S3_URL}/${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}/${query.data?.manifestId}`}
+                className="aspect-video"
+              >
+                <MediaProvider />
+                <DefaultVideoLayout icons={defaultLayoutIcons} />
+              </MediaPlayer>
+            </div>
           </div>
           <VideoData video={query.data} />
         </div>
