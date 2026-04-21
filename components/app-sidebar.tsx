@@ -20,7 +20,7 @@ export default function AppSidebar() {
           ))}
         </div>
       </nav>
-      <NavUser user={{ name: "John Doe", email: "user1@example.com", avatar: "/avatars/john-doe.png" }} />
+      <NavUser user={{ name: "John Doe", email: "user1@example.com", avatar: "/avatars/user.png" }} />
     </div>
   )
 }
