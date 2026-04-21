@@ -21,7 +21,7 @@ export default function AppHeader() {
           <Settings className="h-5 w-5" />
         </Button>
         <Avatar className="h-8 w-8 rounded-lg">
-          <AvatarImage src="/avatars/john-doe.png" alt="User Avatar" />
+          <AvatarImage src="/avatars/user.png" alt="User Avatar" />
           <AvatarFallback className="rounded-lg bg-muted text-muted-foreground">
             U
           </AvatarFallback>
