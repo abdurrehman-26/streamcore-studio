@@ -1,16 +1,14 @@
-import AppSidebar from "@/components/app-sidebar"
+import AppHeader from "@/components/app-header";
+import AppSidebar from "@/components/app-sidebar";
 
-export default function AppLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-svh">
       <AppSidebar />
       <div className="ml-64">
+        <AppHeader />
         {children}
       </div>
     </div>
-  )
+  );
 }
