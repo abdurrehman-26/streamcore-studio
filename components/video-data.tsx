@@ -1,12 +1,15 @@
 import { formatDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 import { Video } from "@/types/videos";
-import { Check, Copy, Pencil } from "lucide-react";
+import { Check, Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import CopyButton from "./CopyButton";
+import { api } from "@/streamcore-api";
 
 export default function VideoData({ video }: { video: Video }) {
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
+  const [title, setTitle] = useState(video.title || "");
   const [description, setDescription] = useState(video.description || "");
   const titleRef = useRef<HTMLInputElement | null>(null);
   const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
@@ -31,6 +34,24 @@ export default function VideoData({ video }: { video: Video }) {
     }
   }, [editingTitle]);
 
+  function handleTitleUpdate() {
+    try {
+      api.videos.updateVideo(video.videoId, {title: title})
+      setEditingTitle(false)
+    } catch (error) {
+      console.error((error as Error).message)
+    }
+  }
+
+  function handleDescriptionUpdate() {
+    try {
+      api.videos.updateVideo(video.videoId, {description: description})
+      setEditingDescription(false)
+    } catch (error) {
+      console.error((error as Error).message)
+    }
+  }
+
   return (
     <div className="pt-2">
       <table className="w-full text-sm border-collapse">
@@ -39,7 +60,7 @@ export default function VideoData({ video }: { video: Video }) {
             <td className="w-40 font-semibold text-slate-800">Video ID</td>
             <td className="text-slate-800">{video.videoId}</td>
             <td className="px-3">
-              <Copy className="h-4 w-4 text-slate-400" />
+              <CopyButton copyContent={video.videoId} />
             </td>
           </tr>
 
@@ -48,12 +69,12 @@ export default function VideoData({ video }: { video: Video }) {
             <td className="text-slate-800">
               <input
                 type="text"
-                autoFocus
                 ref={titleRef}
                 placeholder="Add a title"
                 {...(!editingTitle && { disabled: true })}
-                defaultValue={video.title}
-                onBlur={() => setEditingTitle(false)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={handleTitleUpdate}
                 className={cn(
                   "w-full py-1 text-sm focus:outline-none border-b transition-colors duration-300",
                   editingTitle ? "border-primary" : "border-transparent",
@@ -63,7 +84,7 @@ export default function VideoData({ video }: { video: Video }) {
             <td className="px-3">
               {editingTitle ? (
                 <Check
-                  onClick={() => setEditingTitle(false)}
+                  onClick={handleTitleUpdate}
                   className="h-4 w-4 text-slate-400"
                 />
               ) : (
@@ -88,7 +109,7 @@ export default function VideoData({ video }: { video: Video }) {
                 autoFocus={editingDescription}
                 disabled={!editingDescription}
                 placeholder="Add a description..."
-                onBlur={() => setEditingDescription(false)}
+                onBlur={handleDescriptionUpdate}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") {
                     setEditingDescription(false);
@@ -104,7 +125,7 @@ export default function VideoData({ video }: { video: Video }) {
             <td className="px-3">
               {editingDescription ? (
                 <Check
-                  onClick={() => setEditingDescription(false)}
+                  onClick={handleDescriptionUpdate}
                   className="h-4 w-4 text-slate-400"
                 />
               ) : (
