@@ -23,7 +23,7 @@ export class Videos {
     return response.json();
   }
 
-  async updateVideo(videoId: string, data: z.infer<typeof updateVideoformSchema>): Promise<UpdateVideoResponse> {
+  async updateVideo(videoId: string, data: {title?:string, description?:string}): Promise<UpdateVideoResponse> {
     const response = await fetch(`${API_ENDPOINT}/videos/${videoId}`, {
       method: 'PATCH',
       headers: {
